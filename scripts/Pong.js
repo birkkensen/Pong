@@ -5,10 +5,10 @@ let paddleRightPoints = 0;
 // startign speed and direction
 const speedDirection = [-200, 200];
 let speed = speedDirection[Math.floor(Math.random() * speedDirection.length)];
-console.log(speed);
+
 class Pong extends Phaser.Scene {
   constructor() {
-    super();
+    super({ key: "Pong" });
   }
 
   preload() {
@@ -28,7 +28,7 @@ class Pong extends Phaser.Scene {
     ball = this.physics.add.sprite(center.x, center.y, "ball");
     ball.setCollideWorldBounds(true);
     ball.setBounce(1);
-
+    ball.setVelocityX(speed);
     // Text
     text = this.add.text(center.x, 50, paddleLeftPoints + "   " + paddleRightPoints, {
       fontFamily: "Arial",
@@ -36,8 +36,10 @@ class Pong extends Phaser.Scene {
     });
     text.setOrigin(0.5);
 
+    // Middle line
     let image = this.add.image(center.x, center.y, "line");
     image.setOrigin(0.5);
+
     // Right paddle
     paddleRight = this.physics.add.sprite(center.x * 2 - 50, center.y, "player");
     paddleRight.setCollideWorldBounds(true);
@@ -51,59 +53,62 @@ class Pong extends Phaser.Scene {
     paddleLeftControls = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
       down: Phaser.Input.Keyboard.KeyCodes.S,
-      pause: Phaser.Input.Keyboard.KeyCodes.P,
     });
 
     // Scale the player
     paddleLeft.setScale(1, 1.5);
     paddleRight.setScale(1, 1.5);
 
+    // Remove the collision on the left and right
     this.physics.world.checkCollision.left = false;
     this.physics.world.checkCollision.right = false;
   }
   update() {
-    if (paddleRightControls.space.isDown) {
-      startGame = true;
-      ball.setVelocityX(speed);
-    }
-    if (startGame) {
-      // Set colliders
-      this.physics.add.collider(ball, paddleLeft, bounce, null, this);
-      this.physics.add.collider(ball, paddleRight, bounce, null, this);
-      // Points
-      point();
+    // if (paddleRightControls.space.isDown) {
+    //   // startGame = true;
 
-      // Controls for the right paddle
-      if (paddleRightControls.up.isDown) {
-        paddleRight.setVelocityY(-500);
-      } else if (paddleRightControls.down.isDown) {
-        paddleRight.setVelocityY(500);
-      } else {
-        paddleRight.setVelocityY(0);
-      }
-      // Controls for the left paddle
-      if (paddleLeftControls.up.isDown) {
-        paddleLeft.setVelocityY(-500);
-      } else if (paddleLeftControls.down.isDown) {
-        paddleLeft.setVelocityY(500);
-      } else {
-        paddleLeft.setVelocityY(0);
-      }
+    // }
+    // if (startGame) {
+    // Set colliders
+    this.physics.add.collider(ball, paddleLeft, bounce, null, this);
+    this.physics.add.collider(ball, paddleRight, bounce, null, this);
+    // Points
+    checkIfPoint();
+
+    // Controls for the right paddle
+    if (paddleRightControls.up.isDown) {
+      paddleRight.setVelocityY(-500);
+    } else if (paddleRightControls.down.isDown) {
+      paddleRight.setVelocityY(500);
+    } else {
+      paddleRight.setVelocityY(0);
     }
+    computerPlayer();
+    // // Controls for the left paddle
+    // if (paddleLeftControls.up.isDown) {
+    //   paddleLeft.setVelocityY(-500);
+    // } else if (paddleLeftControls.down.isDown) {
+    //   paddleLeft.setVelocityY(500);
+    // } else {
+    //   paddleLeft.setVelocityY(0);
+    // }
   }
 }
+// }
 
 export default Pong;
 
 // Bounce on the paddle
 function bounce(ball, player) {
-  if (ball.body.velocity.x !== 400) {
+  if (ball.body.velocity.x < 200) {
     if (ball.body.velocity.x < 0) {
-      ball.setVelocityX(-400);
+      ball.setVelocityX(-600);
     } else {
-      ball.setVelocityX(400);
+      ball.setVelocityX(600);
     }
   }
+  console.log("Ball: ", ball.y);
+  console.log("Player: ", player.y);
   if (ball.y < player.y) {
     ball.setVelocityY(ball.body.velocity.y - 70);
   } else {
@@ -112,26 +117,38 @@ function bounce(ball, player) {
 }
 
 // Points counter
-function point() {
+function checkIfPoint() {
   if (ball.x < 0) {
-    paddleRightPoints += 1;
+    paddleRightPoints++;
     resetGame();
   } else if (ball.x > center.x * 2) {
-    paddleLeftPoints += 1;
+    paddleLeftPoints++;
     resetGame();
   }
 }
 // Reset the game and update score
 function resetGame() {
-  text.setText(paddleLeftPoints + "   " + paddleRightPoints);
-  ball.setVelocity(0, 0);
-  ball.setPosition(center.x, center.y);
-  // Set timeout to reset the paddles
-  setTimeout(() => {
-    paddleLeft.setPosition(50, center.y);
-    paddleRight.setPosition(center.x * 2 - 50, center.y);
-  }, 200);
-
   startGame = false;
+  text.setText(paddleLeftPoints + "   " + paddleRightPoints);
+  ball.setVelocity(speed, speed);
+  ball.setPosition(center.x, Math.floor(Math.random() * center.y));
+  // Set timeout to reset the paddles
+  // setTimeout(() => {
+  //   paddleLeft.setPosition(50, center.y);
+  //   paddleRight.setPosition(center.x * 2 - 50, center.y);
+  // }, 200);
+
   speed = speedDirection[Math.floor(Math.random() * speedDirection.length)];
+}
+
+function computerPlayer() {
+  if (ball.x < center.x) {
+    if (ball.y > paddleLeft.y) {
+      paddleLeft.setVelocityY(400);
+    } else if (ball.y < paddleLeft.y) {
+      paddleLeft.setVelocityY(-400);
+    }
+  } else {
+    paddleLeft.setVelocityY(0);
+  }
 }

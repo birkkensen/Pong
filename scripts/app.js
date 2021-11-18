@@ -1,10 +1,10 @@
-import Pong from "./Pong.js";
+import StartScene from "./StartScene.js";
 
 let config = {
   type: Phaser.AUTO,
   width: 800,
   height: 500,
-  scene: [Pong],
+  scene: [StartScene],
   physics: {
     default: "arcade",
     arcade: {
