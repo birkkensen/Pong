@@ -5,6 +5,10 @@ let config = {
   width: 800,
   height: 500,
   scene: [StartScene],
+  // fps: {
+  //   target: 60,
+  //   forceSetTimeOut: true,
+  // },
   physics: {
     default: "arcade",
     arcade: {

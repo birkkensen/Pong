@@ -1,5 +1,6 @@
 import Pong from "./Pong.js";
 let text, center, onePlayer, twoPlayers;
+
 class StartScene extends Phaser.Scene {
   constructor() {
     super({ key: "StartScene" });
